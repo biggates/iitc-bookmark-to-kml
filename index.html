@@ -24,10 +24,11 @@ button {
     width: 100%;
     cursor: pointer;
 }
-textarea {
+#name, textarea {
     color: #20A8B1;
     border: 1px solid #FFCE00;
     background-color: rgba(8, 48, 78, 0.9);
+    width: 100%;
 }
 #bookmark {
     width: 100%;
@@ -43,14 +44,17 @@ textarea {
             <h2>How to use?</h2>
             <ol>
                 <li>Open <a href="//ingress.com/intel" target="_blank">Ingress Intel Map</a></li>
-                <li>Get <a href="//iitc.jonatkins.com/?page=desktop" target="_blank">IITC</a> and <a href="http://iitc.jonatkins.com/release/plugins/bookmarks-by-zaso.user.js">Bookmarks for maps and portals</a> plugin and <a href="http://iitc.jonatkins.com/release/plugins/add-kml.user.js">overlay KML</a> plugin.</li>
-                <li>Add your desired portals to bookmark</li>
+                <li>Get <a href="//iitc.jonatkins.com/?page=desktop" target="_blank">IITC</a> and <a href="http://iitc.jonatkins.com/release/plugins/bookmarks-by-zaso.user.js">Bookmarks for maps and portals</a> plugin.</li>
+                <li>Add your desired portals to bookmark. Organize them into folders if required.</li>
                 <li>In <span class="link">Bookmarks Opt</span>, click <span class="link">Copy bookmarks</span></li>
                 <li><span class="link">Select all</span> and copy the code AND paste under the text area below.</li>
-                <li>Click <span class="link">Get KML</span> button to download a kml file</li>
-                <li>Back to Intel Map and display that kml file</li>
+                <li>(Optional) name your kml</li>
+                <li>Click <span class="link">Get KML</span> button to download the kml file.</li>
+                <li>SHARE the kml file</li>
+                <li>Use that kml file in <a href="https://www.google.com/maps/d/" target="_blank">Google My Maps</a>, add a layer and import the kml</li>
             </ol>
         </div>
+        <input type="text" id="name" placeholder="Name your bookmark(optional)" />
         <textarea id="bookmark" placeholder="Paste your bookmark code here"></textarea>
         <button onclick="kml()" >Get KML</button>
         
@@ -100,11 +104,14 @@ function kml(){
     }
     
     // now generate kml string
-    var kmlStr = '<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2">';
+    var kmlStr = '<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document>';
+    
+    var name = document.getElementById('name').value || 'bookmark';
+    kmlStr += '<name>' + name + '</name>';
     
     for(var i in parsedFolders){
         var folder = parsedFolders[i];
-        // kmlStr += '<Folder name="' + folder.label + '">';
+        kmlStr += '<Folder><name>' + folder.label + '</name>';
         for (var j in folder.portals){
             var portal = folder.portals[j];
             kmlStr += '<Placemark id="' + portal.id + '">';
@@ -112,14 +119,14 @@ function kml(){
             kmlStr += '<Point><coordinates>' + portal.latlng + '</coordinates></Point>';
             kmlStr += '</Placemark>';
         }
-        // kmlStr += '</Folder>';
+        kmlStr += '</Folder>';
     }
-    kmlStr += ' </kml>';
+    kmlStr += ' </Document></kml>';
 
     // now open new window with kmlStr 
     var mtype = 'application/vnd.google-earth.kml+xml';
     var url = 'data:' + mtype + ';charset=utf-8,' + encodeURIComponent(kmlStr);
-    var filename = 'bookmark.kml';
+    var filename = name + '.kml';
     saveAs(url, filename);
 }
         </script>
