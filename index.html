@@ -35,7 +35,6 @@ button {
     min-height: 200px;
     margin: 10px 0;
 }
-
         </style>
     </head>
     <body>
@@ -64,13 +63,10 @@ function saveAs(uri, filename) {
     if (typeof link.download === 'string') {
         link.href = uri;
         link.download = filename;
-
         //Firefox requires the link to be in the body
         document.body.appendChild(link);
-
         //simulate click
         link.click();
-
         //remove the link when done
         document.body.removeChild(link);
     } else {
@@ -86,14 +82,13 @@ function kml(){
     for(var i in folders){
         var folder = folders[i];
         var f = {
-            label: folder.label,
             portals: []
         };
         for(var j in folder.bkmrk){
             var portal = folder.bkmrk[j];
             var p = {
                 id: portal.guid,
-                label: portal.label,
+                label: portal.label.replace("&", "&amp"),
                 latlng: portal.latlng.split(",").reverse().join(",")
             };
             
@@ -104,25 +99,23 @@ function kml(){
     }
     
     // now generate kml string
-    var kmlStr = '<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document>';
+    var kmlStr = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n\n';
     
     var name = document.getElementById('name').value || 'bookmark';
-    kmlStr += '<name>' + name + '</name>';
+    kmlStr += '<name>' + name + '</name>\n\n';
     
     for(var i in parsedFolders){
         var folder = parsedFolders[i];
-        kmlStr += '<Folder><name>' + folder.label + '</name>';
         for (var j in folder.portals){
             var portal = folder.portals[j];
-            kmlStr += '<Placemark id="' + portal.id + '">';
-            kmlStr += '<name>' + portal.label + '</name>';
-            kmlStr += '<Point><coordinates>' + portal.latlng + '</coordinates></Point>';
-            kmlStr += '</Placemark>';
+            kmlStr += '\t<Placemark id="' + portal.id + '">\n';
+			
+            kmlStr += '\t\t<name>' + portal.label + '</name>\n';
+            kmlStr += '\t\t<Point><coordinates>' + portal.latlng + '</coordinates></Point>\n';
+            kmlStr += '\t</Placemark>\n\n';
         }
-        kmlStr += '</Folder>';
     }
-    kmlStr += ' </Document></kml>';
-
+    kmlStr += ' </Document>\n</kml>';
     // now open new window with kmlStr 
     var mtype = 'application/vnd.google-earth.kml+xml';
     var url = 'data:' + mtype + ';charset=utf-8,' + encodeURIComponent(kmlStr);
